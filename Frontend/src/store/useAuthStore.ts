@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import type { User } from '../types/auth';
+import { setAccessToken } from '../services/tokenManager';
+import * as authService from '../services/authService';
 
 interface AuthStore {
   accessToken: string | null;
@@ -11,26 +13,31 @@ interface AuthStore {
   refreshToken: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthStore>(() => ({
+export const useAuthStore = create<AuthStore>((set) => ({
   accessToken: null,
   user: null,
   isAuthenticated: false,
 
-  login: async (_email, _password) => {
-    // TODO: call authService.login, store the accessToken in tokenManager,
-    // then update the store with set({ accessToken, user, isAuthenticated: true })
+  login: async (email, password) => {
+    const response = await authService.login({ email, password });
+    setAccessToken(response.accessToken);
+    set({ accessToken: response.accessToken, user: response.user, isAuthenticated: true });
+
   },
 
-  register: async (_email, _password) => {
-    // TODO: call authService.register, same as login
+  register: async (email, password) => {
+    const response = await authService.register({ email, password });
+    setAccessToken(response.accessToken);
+    set({ accessToken: response.accessToken, user: response.user, isAuthenticated: true });
   },
 
   logout: async () => {
-    // TODO: call authService.logout, clear token from tokenManager,
-    // reset store to initial state
+    await authService.logout();
+    set({ accessToken: null, user: null, isAuthenticated: false });
   },
 
   refreshToken: async () => {
-    // TODO: call authService.refresh, update the accessToken in store + tokenManager
+    const response = await authService.refresh();
+    set({ accessToken: response.accessToken });
   },
 }));

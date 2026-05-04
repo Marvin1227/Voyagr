@@ -32,7 +32,7 @@ AI-driven travel planning web app. Instead of filling in search forms, the user 
 | Frontend | React 18 + Vite 5 (SPA) |
 | Backend | Spring Boot 3.x (Java 21) |
 | Map | Mapbox GL JS v3 |
-| AI | Claude API (`claude-sonnet-4-20250514`) |
+| AI | Claude API (`claude-haiku-4.5`) |
 | State | Zustand |
 | Database | PostgreSQL 16 |
 | Auth | JWT + Spring Security |

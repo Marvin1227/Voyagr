@@ -1,25 +1,24 @@
 import api from './api';
 import type { AuthResponse, LoginRequest, RegisterRequest } from '../types/auth';
+import { setAccessToken } from './tokenManager';
 
-export const login = (_data: LoginRequest): Promise<AuthResponse> => {
-  // TODO: POST /api/auth/login with data, return the response body
-  throw new Error('Not implemented');
+export const login = async (data: LoginRequest): Promise<AuthResponse> => {
+  const response = await api.post<AuthResponse>('/api/auth/login', data);
+  return response.data;
 };
 
-export const register = (_data: RegisterRequest): Promise<AuthResponse> => {
-  // TODO: POST /api/auth/register with data, return the response body
-  throw new Error('Not implemented');
+export const register = async (data: RegisterRequest): Promise<AuthResponse> => {
+  const response = await api.post<AuthResponse>('/api/auth/register', data);
+  return response.data;
 };
 
-export const refresh = (): Promise<{ accessToken: string }> => {
-  // TODO: POST /api/auth/refresh (cookie sent automatically), return { accessToken }
-  throw new Error('Not implemented');
+export const refresh = async (): Promise<{ accessToken: string }> => {
+  const response = await api.post<{ accessToken: string }>('/api/auth/refresh');
+  setAccessToken(response.data.accessToken);
+  return response.data;
 };
 
-export const logout = (): Promise<void> => {
-  // TODO: POST /api/auth/logout
-  throw new Error('Not implemented');
+export const logout = async (): Promise<void> => {
+  await api.post('/api/auth/logout');
+  setAccessToken(null);
 };
-
-// silence unused import warning until implemented
-void api;
