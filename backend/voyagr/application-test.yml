@@ -1,0 +1,40 @@
+spring:
+  config:
+    import: ""
+
+  datasource:
+    url: jdbc:h2:mem:voyagr-test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop          # Tests own their schema.
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+  flyway:
+    enabled: false                   # Flyway is for prod schema; tests use Hibernate-generated schema.
+
+voyagr:
+  jwt:
+    secret: dGVzdC1zZWNyZXQta2V5LW1pbmltdW0tMzItY2hhcmFjdGVycy1sb25n
+    access-token-ttl-minutes: 15
+    refresh-token-ttl-days: 30
+    issuer: voyagr-test
+  ai:
+    claude:
+      api-key: test-key
+      model: claude-sonnet-4-20250514
+      max-tokens: 2048
+      timeout-seconds: 5
+  external:
+    weather:
+      api-key: test
+    places:
+      api-key: test
+    flights:
+      provider: mock
+      api-key: test

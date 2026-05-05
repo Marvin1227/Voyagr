@@ -1,0 +1,97 @@
+spring:
+  application:
+    name: voyagr
+
+  # Loads backend/.env if present (optional). KEY=VALUE format works as Spring properties.
+  config:
+    import: optional:file:./.env[.properties]
+
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/voyagr}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate            # Schema is owned by Flyway, never by Hibernate.
+    open-in-view: false             # OSIV is an anti-pattern in REST services.
+    properties:
+      hibernate:
+        jdbc.time_zone: UTC
+        format_sql: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  jackson:
+    default-property-inclusion: non_null
+
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: never       # Never leak stack traces to clients.
+
+# ---- App-specific config ----
+voyagr:
+  cors:
+    # Comma-separated list, override via VOYAGR_CORS_ALLOWED_ORIGINS env var in prod.
+    allowed-origins: ${VOYAGR_CORS_ALLOWED_ORIGINS:http://localhost:5173}
+
+  jwt:
+    secret: ${JWT_SECRET:}                    # Required. Min 32 bytes. App fails fast if missing.
+    access-token-ttl-minutes: 15
+    refresh-token-ttl-days: 30
+    issuer: voyagr
+
+  origin:
+    # Origin city for flight searches (Stockholm, per docs).
+    name: Stockholm
+    iata: ARN
+    lat: 59.3293
+    lng: 18.0686
+
+  ai:
+    claude:
+      api-key: ${ANTHROPIC_API_KEY:}
+      model: claude-sonnet-4-20250514
+      max-tokens: 2048
+      timeout-seconds: 30
+
+  external:
+    weather:
+      base-url: https://api.openweathermap.org/data/2.5
+      api-key: ${OPENWEATHERMAP_API_KEY:}
+      timeout-seconds: 5
+    places:
+      base-url: https://maps.googleapis.com/maps/api/place
+      api-key: ${GOOGLE_PLACES_API_KEY:}
+      timeout-seconds: 5
+    flights:
+      # mock = use MockFlightClient. real = use SkyscannerFlightClient (not implemented in v1).
+      provider: mock
+      api-key: ${SKYSCANNER_API_KEY:}
+      timeout-seconds: 5
+
+  rag:
+    # Cap parallel external calls so a slow upstream can't pin all worker threads.
+    parallelism: 8
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+logging:
+  level:
+    org.example.voyagr: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
